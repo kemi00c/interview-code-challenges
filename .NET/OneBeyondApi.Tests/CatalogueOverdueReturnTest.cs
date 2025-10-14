@@ -31,7 +31,7 @@ namespace OneBeyondApi.Tests
             // Arrange
             var mockLogger = new Mock<ILogger<CatalogueController>>();
 
-            var catalogueController = new CatalogueController(mockLogger.Object, new CatalogueRepository());
+            var catalogueController = new CatalogueController(mockLogger.Object, new CatalogueRepository(), new BookRepository(), new BorrowerRepository());
 
             // Act
             var result1 = catalogueController.OnLoanReturn("Liana James", "Agile Project Management - A Primer");

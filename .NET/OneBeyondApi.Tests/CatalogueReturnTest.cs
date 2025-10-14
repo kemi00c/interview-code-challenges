@@ -17,6 +17,10 @@ namespace OneBeyondApi.Tests
         [TestInitialize]
         public void Init()
         {
+            using (var context = new LibraryContext())
+            {
+                context.Database.EnsureDeleted();
+            }
             SeedData.SetInitialData();
         }
 
@@ -26,7 +30,7 @@ namespace OneBeyondApi.Tests
             // Arrange
             var mockLogger = new Mock<ILogger<CatalogueController>>();
 
-            var catalogueController = new CatalogueController(mockLogger.Object, new CatalogueRepository());
+            var catalogueController = new CatalogueController(mockLogger.Object, new CatalogueRepository(), new BookRepository(), new BorrowerRepository());
 
             // Act
             var result = catalogueController.OnLoanReturn("asdf", "asdf");
@@ -42,7 +46,7 @@ namespace OneBeyondApi.Tests
             // Arrange
             var mockLogger = new Mock<ILogger<CatalogueController>>();
 
-            var catalogueController = new CatalogueController(mockLogger.Object, new CatalogueRepository());
+            var catalogueController = new CatalogueController(mockLogger.Object, new CatalogueRepository(), new BookRepository(), new BorrowerRepository());
 
             // Act
             var result = catalogueController.OnLoanReturn("Dave Smith", "The Importance of Clay");

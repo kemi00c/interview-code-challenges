@@ -78,5 +78,24 @@ namespace OneBeyondApi.DataAccess
 
             return true;
         }
+
+        public bool Reserve(BookStock stock, string borrowerName, DateTime dueDateTime)
+        {
+            using (var context = new LibraryContext())
+            {
+                var bookStock = context.Catalogue.Where(c => c.Id == stock.Id).Include(c => c.Book).Include(c => c.OnLoanTo).FirstOrDefault();
+                var borrower = context.Borrowers.Where(b => b.Name == borrowerName).FirstOrDefault();
+                if (bookStock == null || borrower == null)
+                {
+                    return false;
+                }
+                bookStock.OnLoanTo = borrower;
+                bookStock.LoanEndDate = dueDateTime;
+
+                context.SaveChanges();
+            }
+
+            return true;
+        }
     }
 }

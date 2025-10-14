@@ -9,5 +9,7 @@ namespace OneBeyondApi.DataAccess
         public List<BookStock> SearchCatalogue(CatalogueSearch search);
 
         public bool Return(BookStock stock);
+
+        public bool Reserve(BookStock stock, string borrowerName, DateTime dueDateTime);
     }
 }

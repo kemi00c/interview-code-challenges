@@ -8,11 +8,20 @@ namespace OneBeyondApi.Tests
     [TestClass]
     public class CatalogueOnLoanTest
     {
+        [TestInitialize]
+        public void Init()
+        {
+            using (var context = new LibraryContext())
+            {
+                context.Database.EnsureDeleted();
+            }
+            SeedData.SetInitialData();
+        }
+
         [TestMethod]
         public void TestBorrowersOnLoan()
         {
             // Arrange
-            SeedData.SetInitialData();
             var mockLogger = new Mock<ILogger<CatalogueController>>();
 
            

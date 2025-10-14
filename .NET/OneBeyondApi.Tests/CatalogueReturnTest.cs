@@ -17,6 +17,10 @@ namespace OneBeyondApi.Tests
         [TestInitialize]
         public void Init()
         {
+            using (var context = new LibraryContext())
+            {
+                context.Database.EnsureDeleted();
+            }
             SeedData.SetInitialData();
         }
 

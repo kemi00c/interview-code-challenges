@@ -56,6 +56,19 @@ namespace OneBeyondApi.DataAccess
                     return false;
                 }
 
+                if (onLoan.LoanEndDate < DateTime.Now.Date) // Book is overdue
+                {
+                    var overdueReturns = context.OverdueReturns.Where(o => o.Borrower != null && o.Borrower.Id == stock.OnLoanTo.Id).FirstOrDefault();
+                    if (overdueReturns == null)
+                    {
+                        context.OverdueReturns.Add(new OverdueReturns { Borrower = onLoan.OnLoanTo, NumberOfOverdueReturns = 1 });
+                    }
+                    else
+                    {
+                        overdueReturns.NumberOfOverdueReturns++;
+                    }
+                }
+
 
                 onLoan.LoanEndDate = null;
                 onLoan.OnLoanTo = null;

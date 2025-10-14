@@ -11,11 +11,15 @@ namespace OneBeyondApi.Controllers
     {
         private readonly ILogger<CatalogueController> _logger;
         private readonly ICatalogueRepository _catalogueRepository;
+        private readonly IBookRepository _bookRepository;
+        private readonly IBorrowerRepository _borrowerRepository;
 
-        public CatalogueController(ILogger<CatalogueController> logger, ICatalogueRepository catalogueRepository)
+        public CatalogueController(ILogger<CatalogueController> logger, ICatalogueRepository catalogueRepository, IBookRepository bookRepository, IBorrowerRepository borrowerRepository)
         {
             _logger = logger;
             _catalogueRepository = catalogueRepository;
+            _bookRepository = bookRepository;
+            _borrowerRepository = borrowerRepository;
         }
 
         [HttpGet]
@@ -72,6 +76,20 @@ namespace OneBeyondApi.Controllers
         [Route("Reserve")]
         public ActionResult ReserveBook(string borrowerName, string bookTitle, DateOnly dueDate)
         {
+            var borrower = _borrowerRepository.GetBorrowers().Where(b => b.Name == borrowerName).FirstOrDefault();
+            var book = _bookRepository.GetBooks().Where(b => b.Name == bookTitle).FirstOrDefault();
+
+            if (borrower == null)
+            {
+                return BadRequest($"No registered borrower with name {borrowerName} exists.");
+            }
+
+            if (book == null)
+            {
+                return BadRequest($"No book with title {bookTitle} exists.");
+            }
+
+
             var dueDateTime = new DateTime(dueDate, new TimeOnly());
 
             if (dueDateTime.Date <= DateTime.Now.Date)
@@ -115,38 +133,51 @@ namespace OneBeyondApi.Controllers
 
         [HttpGet]
         [Route("CheckAvailablity")]
-        public DateOnly CheckAvailability(string borrowerName, string bookTitle)
+        public ActionResult CheckAvailability(string borrowerName, string bookTitle)
         {
+            var borrower = _borrowerRepository.GetBorrowers().Where(b => b.Name == borrowerName).FirstOrDefault();
+            var book = _bookRepository.GetBooks().Where(b => b.Name == bookTitle).FirstOrDefault();
+
+            if (borrower == null)
+            {
+                return BadRequest($"No registered borrower with name {borrowerName} exists.");
+            }
+
+            if (book == null)
+            {
+                return BadRequest($"No book with title {bookTitle} exists.");
+            }
+
             var activeReserve = _catalogueRepository.GetCatalogue().Where(c => c.Book.Name == bookTitle && c.OnLoanTo != null && c.OnLoanTo.Name == borrowerName && c.LoanEndDate > DateTime.Now.Date).FirstOrDefault();
             if (activeReserve != null)
             {
                 var previousReserve = _catalogueRepository.GetCatalogue().Where(c => c.Book.Name == bookTitle && c.LoanEndDate < activeReserve.LoanEndDate).OrderByDescending(c => c.LoanEndDate).FirstOrDefault();
                 if (previousReserve == null || previousReserve.LoanEndDate <= DateTime.Now)    // if no previous reserve, or the previous end date is in the past the book is available with the current date.
                 {
-                    return new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                    return Ok(new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
                 }
 
                 var previousEndDate = previousReserve.LoanEndDate.Value;
 
-                return new DateOnly(previousEndDate.Year, previousEndDate.Month, previousEndDate.Day);  // If the book is currently on loan to someone else, the next available date is the previous end date.
+                return Ok(new DateOnly(previousEndDate.Year, previousEndDate.Month, previousEndDate.Day));  // If the book is currently on loan to someone else, the next available date is the previous end date.
             }
             else   // If no active reserve, check if there is a free copy not in loan
             {
                 var freeStock = _catalogueRepository.GetCatalogue().Where(c => c.Book.Name == bookTitle && c.OnLoanTo == null && c.LoanEndDate == null).FirstOrDefault();
                 if (freeStock != null)  // If there is a free stock instance, it's available now.
                 {
-                    return new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                    return Ok(new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
                 }
                 // If no free stock, check the previous reserve for availability
                 var previousReserve = _catalogueRepository.GetCatalogue().Where(c => c.Book.Name == bookTitle).OrderByDescending(c => c.LoanEndDate).FirstOrDefault();
 
                 if (previousReserve == null || previousReserve.LoanEndDate == null || previousReserve.LoanEndDate <= DateTime.Now.Date)    // If no previous reserve, or the end date is in the past the book is available now.
                 {
-                    return new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                    return Ok(new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day));
                 }
 
                 var previousEndDate = previousReserve.LoanEndDate.Value;
-                return new DateOnly(previousEndDate.Year, previousEndDate.Month, previousEndDate.Day);
+                return Ok(new DateOnly(previousEndDate.Year, previousEndDate.Month, previousEndDate.Day));
             }
         }
     }

@@ -24,8 +24,8 @@ namespace OneBeyondApi.Tests
             // Arrange
             var mockLogger = new Mock<ILogger<CatalogueController>>();
 
-           
-            var catalogueController = new CatalogueController(mockLogger.Object, new CatalogueRepository());
+
+            var catalogueController = new CatalogueController(mockLogger.Object, new CatalogueRepository(), new BookRepository(), new BorrowerRepository());
 
             // Act
             var borrowersOnLoan = catalogueController.OnLoan();

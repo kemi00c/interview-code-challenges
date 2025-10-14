@@ -39,7 +39,7 @@ namespace OneBeyondApi.Controllers
         public List<BorrowerOnLoan> OnLoan()
         {
             var borrowersOnLoan = new List<BorrowerOnLoan>();
-            var loans = _catalogueRepository.GetCatalogue().Where(c => c.LoanEndDate != null && c.LoanEndDate >= DateTime.Now.Date).GroupBy(c => c.OnLoanTo).ToList();
+            var loans = _catalogueRepository.GetCatalogue().Where(b => b.OnLoanTo != null).GroupBy(c => c.OnLoanTo).ToList();
             foreach (var loan in loans)
             {
                 var borrowerOnLoan = new BorrowerOnLoan();

@@ -7,5 +7,7 @@ namespace OneBeyondApi.DataAccess
         public List<BookStock> GetCatalogue();
 
         public List<BookStock> SearchCatalogue(CatalogueSearch search);
+
+        public bool Return(BookStock stock);
     }
 }

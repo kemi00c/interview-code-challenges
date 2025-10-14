@@ -6,19 +6,20 @@ using OneBeyondApi.DataAccess;
 namespace OneBeyondApi.Tests
 {
     [TestClass]
-    public class BorrowerTest
+    public class CatalogueOnLoanTest
     {
         [TestMethod]
         public void TestBorrowersOnLoan()
         {
             // Arrange
             SeedData.SetInitialData();
-            var mockLogger = new Mock<ILogger<BorrowerController>>();
+            var mockLogger = new Mock<ILogger<CatalogueController>>();
 
-            var borrowerController = new BorrowerController(mockLogger.Object, new BorrowerRepository(), new CatalogueRepository());
+           
+            var catalogueController = new CatalogueController(mockLogger.Object, new CatalogueRepository());
 
             // Act
-            var borrowersOnLoan = borrowerController.OnLoan();
+            var borrowersOnLoan = catalogueController.OnLoan();
 
             // Assert
             Assert.AreEqual(2, borrowersOnLoan.Count);

@@ -11,13 +11,11 @@ namespace OneBeyondApi.Controllers
     {
         private readonly ILogger<BorrowerController> _logger;
         private readonly IBorrowerRepository _borrowerRepository;
-        private readonly ICatalogueRepository _catalogueRepository;
 
-        public BorrowerController(ILogger<BorrowerController> logger, IBorrowerRepository borrowerRepository, ICatalogueRepository catalogueRepository)
+        public BorrowerController(ILogger<BorrowerController> logger, IBorrowerRepository borrowerRepository)
         {
             _logger = logger;
             _borrowerRepository = borrowerRepository;
-            _catalogueRepository = catalogueRepository;
         }
 
         [HttpGet]
@@ -32,24 +30,6 @@ namespace OneBeyondApi.Controllers
         public Guid Post(Borrower borrower)
         {
             return _borrowerRepository.AddBorrower(borrower);
-        }
-
-        [HttpGet]
-        [Route("OnLoan")]
-        public List<BorrowerOnLoan> OnLoan()
-        {
-            var borrowersOnLoan = new List<BorrowerOnLoan>();
-            var loans = _catalogueRepository.GetCatalogue().Where(c => c.LoanEndDate != null && c.LoanEndDate >= DateTime.Now.Date).GroupBy(c => c.OnLoanTo).ToList();
-            foreach (var loan in loans)
-            {
-                var borrowerOnLoan = new BorrowerOnLoan();
-                borrowerOnLoan.Borrower = loan.Key;
-                borrowerOnLoan.BookTitles = loan.Select(stock => stock.Book.Name).ToList();
-
-                borrowersOnLoan.Add(borrowerOnLoan);
-            }
-
-            return borrowersOnLoan;
         }
     }
 }
